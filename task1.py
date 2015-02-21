@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import numpy as np
+import math
 
 class MainWindow(QMainWindow):
   ###
@@ -106,15 +107,28 @@ class MainWindow(QMainWindow):
 
   def scaleImage(self, percent):
     if not self.loadedImage: return
-
+    scale = percent / 100.0
     w = self.loadedImage.width()
     h = self.loadedImage.height()
 
-    w = round(w * percent / 100)
-    h = round(h * percent / 100)
+    w = int(round(w * scale))
+    h = int(round(h * scale))
 
-    img = QImage(w, h, QImage.Format_RGB888)
-    img.fill(Qt.black)
+    img = QImage(w, h, QImage.Format_RGB32)
+    ptr = img.bits()
+    ptr.setsize(img.byteCount())
+    arr = np.asarray(ptr).reshape(h, w, 4)
+
+    for i in range(h):
+      for j in range(w):
+        x = math.floor(j/scale)
+        y = math.floor(i/scale)
+        pixel = self.loadedImage.pixel(x, y)
+        b = qBlue(pixel)
+        g = qGreen(pixel)
+        r = qRed(pixel)
+        # BGR
+        arr[i][j] = [b,g,r,0]
 
     imageLabel = QLabel()
     imageLabel.setPixmap(QPixmap.fromImage(img))
@@ -125,23 +139,19 @@ class MainWindow(QMainWindow):
     filePath, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Image Files (*.png *.jpeg *.jpg)')
     imageLabel = QLabel()
     self.loadedImage = QImage(filePath)
-    self.loadedImage.convertToFormat(QImage.Format_RGB888)
+    # self.loadedImage = self.loadedImage.convertToFormat(QImage.Format_RGB32)
 
-    img = self.loadedImage
-    ptr = img.bits()
-    ptr.setsize(img.byteCount())
-    buf = buffer(ptr, 0, img.byteCount())
-    arr = np.asarray(ptr).reshape(img.height(), img.width(), 4)
-    # print arr
+    # img = self.loadedImage
+    # ptr = img.bits()
+    # ptr.setsize(img.byteCount())
+    # w = img.width()
+    # h = img.height()
+    # arr = np.asarray(ptr).reshape(h, w, 4)
 
-    w = img.width()
-    h = img.height()
-
-    # print h, w, len(arr),len(arr[0])
-
-    for i in range(10):
-      for j in range(10):
-        arr[i][j] = [0,0,0,255]
+    # for i in range(h):
+    #   for j in range(w):
+    #     # BGR
+    #     arr[i][j] = [50,147,246,0]
 
 
     imageLabel.setPixmap(QPixmap.fromImage(self.loadedImage))
