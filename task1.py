@@ -139,21 +139,6 @@ class MainWindow(QMainWindow):
     filePath, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Image Files (*.png *.jpeg *.jpg)')
     imageLabel = QLabel()
     self.loadedImage = QImage(filePath)
-    # self.loadedImage = self.loadedImage.convertToFormat(QImage.Format_RGB32)
-
-    # img = self.loadedImage
-    # ptr = img.bits()
-    # ptr.setsize(img.byteCount())
-    # w = img.width()
-    # h = img.height()
-    # arr = np.asarray(ptr).reshape(h, w, 4)
-
-    # for i in range(h):
-    #   for j in range(w):
-    #     # BGR
-    #     arr[i][j] = [50,147,246,0]
-
-
     imageLabel.setPixmap(QPixmap.fromImage(self.loadedImage))
     self.scrollArea.setWidget(imageLabel)
 
