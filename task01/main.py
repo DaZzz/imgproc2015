@@ -40,7 +40,6 @@ class MainWindow(QMainWindow):
 
     self.createActions()
     self.createMenus()
-    self.setupOutlets()
 
   ###
   # Create scroll area
@@ -121,7 +120,7 @@ class MainWindow(QMainWindow):
 
     # Bilinear interpolation
     if self.isBilinearButton.isChecked():
-      pass
+      scaledImage = Scaler.bilinearInterpolation(self.loadedImage, scale)
 
     imageLabel = QLabel()
     imageLabel.setPixmap(QPixmap.fromImage(scaledImage))
