@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import numpy as np
 import math
+from scaler import Scaler
 
 class MainWindow(QMainWindow):
   ###
@@ -70,15 +71,15 @@ class MainWindow(QMainWindow):
   ###
   def createRadiobuttons(self):
     self.radioButtons = QGroupBox('Method')
-    r1 = QRadioButton('Nearest neighbor')
-    r2 = QRadioButton('Biquad interpolation')
-    r3 = QRadioButton('Bicubic interpolation')
-    r1.setChecked(True)
+    self.isNearestNeighbourButton = QRadioButton('Nearest neighbor')
+    self.isBilinearButton = QRadioButton('Bilinear interpolation')
+    self.isBicubicButton = QRadioButton('Bicubic interpolation')
+    self.isNearestNeighbourButton.setChecked(True)
 
     vbox = QVBoxLayout()
-    vbox.addWidget(r1)
-    vbox.addWidget(r2)
-    vbox.addWidget(r3)
+    vbox.addWidget(self.isNearestNeighbourButton)
+    vbox.addWidget(self.isBilinearButton)
+    vbox.addWidget(self.isBicubicButton)
 
     self.radioButtons.setLayout(vbox)
     self.radioButtons.setFixedHeight(180)
@@ -108,30 +109,22 @@ class MainWindow(QMainWindow):
   def scaleImage(self, percent):
     if not self.loadedImage: return
     scale = percent / 100.0
-    w = self.loadedImage.width()
-    h = self.loadedImage.height()
+    scaledImage = None
 
-    w = int(round(w * scale))
-    h = int(round(h * scale))
+    # Nearest neighbour interpolation
+    if self.isNearestNeighbourButton.isChecked():
+      scaledImage = Scaler.nearestNeighbourInterpolation(self.loadedImage, scale)
 
-    img = QImage(w, h, QImage.Format_RGB32)
-    ptr = img.bits()
-    ptr.setsize(img.byteCount())
-    arr = np.asarray(ptr).reshape(h, w, 4)
+    # Bicubic interpolation
+    if self.isBicubicButton.isChecked():
+      pass
 
-    for i in range(h):
-      for j in range(w):
-        x = math.floor(j/scale)
-        y = math.floor(i/scale)
-        pixel = self.loadedImage.pixel(x, y)
-        b = qBlue(pixel)
-        g = qGreen(pixel)
-        r = qRed(pixel)
-        # BGR
-        arr[i][j] = [b,g,r,0]
+    # Bilinear interpolation
+    if self.isBilinearButton.isChecked():
+      pass
 
     imageLabel = QLabel()
-    imageLabel.setPixmap(QPixmap.fromImage(img))
+    imageLabel.setPixmap(QPixmap.fromImage(scaledImage))
     self.scrollArea.setWidget(imageLabel)
 
   # Actions
@@ -149,10 +142,6 @@ class MainWindow(QMainWindow):
   def createMenus(self):
     self.fileMenu = self.menuBar().addMenu('&File')
     self.fileMenu.addAction(self.openAct)
-
-  # Outlets
-  def setupOutlets(self):
-    pass
 
 # Run programm
 if __name__ == '__main__':
