@@ -19,6 +19,7 @@ class MainWindow(QMainWindow):
 
     # Loaded Image
     self.loadedImage = None
+    self.scaledImage = None
 
     # Basic window setup
     self.setWindowTitle('Scaler 3000')
@@ -108,11 +109,10 @@ class MainWindow(QMainWindow):
   def scaleImage(self, percent):
     if not self.loadedImage: return
     scale = percent / 100.0
-    scaledImage = None
 
     # Nearest neighbour interpolation
     if self.isNearestNeighbourButton.isChecked():
-      scaledImage = Scaler.nearestNeighbourInterpolation(self.loadedImage, scale)
+      self.scaledImage = Scaler.nearestNeighbourInterpolation(self.loadedImage, scale)
 
     # Bicubic interpolation
     if self.isBicubicButton.isChecked():
@@ -120,10 +120,10 @@ class MainWindow(QMainWindow):
 
     # Bilinear interpolation
     if self.isBilinearButton.isChecked():
-      scaledImage = Scaler.bilinearInterpolation(self.loadedImage, scale)
+      self.scaledImage = Scaler.bilinearInterpolation(self.loadedImage, scale)
 
     imageLabel = QLabel()
-    imageLabel.setPixmap(QPixmap.fromImage(scaledImage))
+    imageLabel.setPixmap(QPixmap.fromImage(self.scaledImage))
     self.scrollArea.setWidget(imageLabel)
 
   # Actions
@@ -131,16 +131,25 @@ class MainWindow(QMainWindow):
     filePath, _ = QFileDialog.getOpenFileName(self, 'Open Image', '', 'Image Files (*.png *.jpeg *.jpg)')
     imageLabel = QLabel()
     self.loadedImage = QImage(filePath)
+    self.scaledImage = self.loadedImage
     imageLabel.setPixmap(QPixmap.fromImage(self.loadedImage))
     self.scrollArea.setWidget(imageLabel)
 
+  def save(self):
+    if not self.scaledImage: return
+    filePath, _ = QFileDialog.getSaveFileName(self, 'Save Image', '', 'Image Files (*.png *.jpeg *.jpg)')
+    self.scaledImage.save(filePath)
+
   def createActions(self):
     self.openAct = QAction('&Open', self, shortcut=QKeySequence.Open, triggered=self.open)
+    self.saveAct = QAction('&Save', self, shortcut=QKeySequence.Save, triggered=self.save)
 
   # Menus
   def createMenus(self):
     self.fileMenu = self.menuBar().addMenu('&File')
     self.fileMenu.addAction(self.openAct)
+    self.fileMenu.addAction(self.saveAct)
+
 
 # Run programm
 if __name__ == '__main__':

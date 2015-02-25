@@ -9,6 +9,9 @@ class Scaler(object):
     super(Scaler, self).__init__()
     self.arg = arg
 
+  ###
+  # Nearest neighbour method
+  ###
   @classmethod
   def nearestNeighbourInterpolation(cls, image, scale):
     newW = int(round(image.width() * scale))
@@ -31,6 +34,9 @@ class Scaler(object):
 
     return newImage
 
+  ###
+  # Bilinear interpolation
+  ###
   @classmethod
   def bilinearInterpolation(cls, image, scale):
     oldW = image.width()
@@ -46,8 +52,6 @@ class Scaler(object):
     oldBitsPointer = image.bits()
     oldBitsPointer.setsize(image.byteCount())
     oldBitsArray = np.asarray(oldBitsPointer).reshape(image.height(), image.width(), 4)
-
-    print image.height(), image.width()
 
     for h in range(newH):
       for w in range(newW):
@@ -96,6 +100,9 @@ class Scaler(object):
 
     return min(max(int(round(val)), 0), 255)
 
+  ###
+  # Bicubic interpolation
+  ###
   @classmethod
   def bicubicInterpolation(cls, image, scale):
     pass
